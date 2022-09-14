@@ -1,30 +1,25 @@
-import QtQuick 2.13
-import QtQuick.Controls 2.13
-import QtQml.Models 2.12
+import QtQuick 2.15
+import QtQml.Models 2.15
 
 DelegateModel {
     property var filter: null
     readonly property bool running: updating || sorting
-    readonly property int updateIndex: internal.updateIndex
-    readonly property bool updated: internal.updateIndex >= allItems.count
+    property int updateIndex: 0
+    readonly property bool updated: updateIndex >= allItems.count
     readonly property bool updating: !updated
     readonly property int progress: updating
-    ? Math.floor(50 * internal.updateIndex / allItems.count)
-    : sorting ? Math.floor(50 + 50 * internal.sortIndex / _visibleItems.count)
+    ? Math.floor(50 * updateIndex / allItems.count)
+    : sorting ? Math.floor(50 + 50 * sortIndex / _visibleItems.count)
               : 0
     property int sortOrder: Qt.AscendingOrder
     property int sortCaseSensitivity: Qt.CaseInsensitive
     property var sortRole: ""
+    property var sortOps: [ ]
     property var sortCompare: null
-    readonly property  int sortIndex: internal.sortIndex
-    readonly property bool sorted: internal.sortIndex >= _visibleItems.count
+    property int sortIndex: sortIndex
+    readonly property bool sorted: sortIndex >= _visibleItems.count
     readonly property bool sorting: !sorted
     readonly property alias visibleItems: _visibleItems
-    property QtObject internal: QtObject {
-        property int updateIndex: 0
-        property int sortIndex: 0
-        property var sortOps: [ ]
-    }
     onFilterChanged: Qt.callLater(update)
     onSortOrderChanged: Qt.callLater(sort)
     onSortCaseSensitivityChanged: Qt.callLater(sort)
@@ -35,16 +30,16 @@ DelegateModel {
             name: "all"
             includeByDefault: true
             onCountChanged: {
-                if (internal.updateIndex > allItems.count) internal.updateIndex = allItems.count;
-                if (internal.updateIndex < allItems.count) Qt.callLater(update);
+                if (updateIndex > allItems.count) updateIndex = allItems.count;
+                if (updateIndex < allItems.count) Qt.callLater(update);
             }
         },
         DelegateModelGroup {
             id: _visibleItems
             name: "visible"
             onCountChanged: {
-                if (internal.sortIndex > _visibleItems.count) internal.sortIndex = 0;
-                if (internal.sortIndex < _visibleItems.count) Qt.callLater(sort);
+                if (sortIndex > _visibleItems.count) sortIndex = 0;
+                if (sortIndex < _visibleItems.count) Qt.callLater(sort);
             }
         }
     ]
@@ -54,28 +49,28 @@ DelegateModel {
         startIndex = startIndex ?? 0;
         if (startIndex < 0) startIndex = 0;
         if (startIndex >= allItems.count) {
-            internal.updateIndex = allItems.count;
+            updateIndex = allItems.count;
             return;
         }
-        internal.updateIndex = startIndex;
-        if (internal.updateIndex === 0) {
-            internal.sortIndex = 0;
+        updateIndex = startIndex;
+        if (updateIndex === 0) {
+            sortIndex = 0;
             compileSortRole();
             allItems.setGroups(0, allItems.count, [ "all" ] );
         }
-        for (let ts = Date.now(); internal.updateIndex < allItems.count && Date.now() < ts + 50; internal.updateIndex++) {
-            let visible = !filter || filter(allItems.get(internal.updateIndex).model);
+        for (let ts = Date.now(); updateIndex < allItems.count && Date.now() < ts + 50; updateIndex++) {
+            let visible = !filter || filter(allItems.get(updateIndex).model);
             if (!visible) continue;
-            allItems.setGroups(internal.updateIndex, 1, [ "all", "visible" ]);
+            allItems.setGroups(updateIndex, 1, [ "all", "visible" ]);
         }
-        if (internal.updateIndex < allItems.count) Qt.callLater(update, internal.updateIndex);
+        if (updateIndex < allItems.count) Qt.callLater(update, updateIndex);
     }
 
     function compileSortRole() {
-        internal.sortOps = [ ];
+        sortOps = [ ];
         if (typeof(sortRole) === 'string') {
             if (sortRole) {
-                internal.sortOps.push( {
+                sortOps.push( {
                         sortRole: sortRole,
                         sortOrder: sortOrder,
                         sortCaseSensitivity: sortCaseSensitivity
@@ -97,7 +92,7 @@ DelegateModel {
                     sortOrder: sortOrder,
                     sortCaseSensitivity: sortCaseSensitivity
                 };
-                internal.sortOps.push( _op );
+                sortOps.push( _op );
                 continue;
             }
             let op = _sortRole;
@@ -108,7 +103,7 @@ DelegateModel {
                 sortOrder: ("sortOrder" in op) ? op.sortOrder : sortOrder,
                 sortCaseSensitivity: ("sortCaseSensitivity" in op) ? op.sortCaseSensitivity : sortCaseSensitivity
             };
-            internal.sortOps.push( _op );
+            sortOps.push( _op );
         }
     }
 
@@ -132,24 +127,24 @@ DelegateModel {
         startIndex = startIndex ?? 0;
         if (startIndex < 0) return;
         if (startIndex >= _visibleItems.count) {
-            internal.sortIndex = _visibleItems.count;
+            sortIndex = _visibleItems.count;
             return;
         }
-        internal.sortIndex = startIndex;
-        if (internal.sortIndex === 0) {
+        sortIndex = startIndex;
+        if (sortIndex === 0) {
             compileSortRole();
         }
-        if (!internal.sortOps.length) {
-            internal.sortIndex = _visibleItems.count;
+        if (!sortOps.length) {
+            sortIndex = _visibleItems.count;
             return;
         }
-        for (let ts = Date.now(); internal.sortIndex < _visibleItems.count && Date.now() < ts + 50; internal.sortIndex++) {
-            if (!internal.sortIndex) continue;
-            let newIndex = findInsertIndex(_visibleItems.get(internal.sortIndex).model, 0, internal.sortIndex - 1, sortCompare || defaultSortCompare);
-            if (newIndex === internal.sortIndex) continue;
-            _visibleItems.move(internal.sortIndex, newIndex, 1);
+        for (let ts = Date.now(); sortIndex < _visibleItems.count && Date.now() < ts + 50; sortIndex++) {
+            if (!sortIndex) continue;
+            let newIndex = findInsertIndex(_visibleItems.get(sortIndex).model, 0, sortIndex - 1, sortCompare || defaultSortCompare);
+            if (newIndex === sortIndex) continue;
+            _visibleItems.move(sortIndex, newIndex, 1);
         }
-        if (internal.sortIndex < _visibleItems.count) Qt.callLater(sort, internal.sortIndex);
+        if (sortIndex < _visibleItems.count) Qt.callLater(sort, sortIndex);
     }
 
     function naturalExpand(str) {
@@ -162,7 +157,7 @@ DelegateModel {
 
     function defaultSortCompare(a, b) {
         let cmp = 0;
-        for (let sortOp of internal.sortOps) {
+        for (let sortOp of sortOps) {
             let sortRole = sortOp.sortRole;
             let sortCaseSensitivity = sortOp.sortCaseSensitivity;
             let valueA = a[sortRole];
