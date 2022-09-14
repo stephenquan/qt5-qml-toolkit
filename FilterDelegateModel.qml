@@ -4,8 +4,8 @@ import QtQml.Models 2.12
 
 DelegateModel {
     property var filter: null
+    readonly property bool running: !filtered
     readonly property bool filtered: updateIndex >= allItems.count
-    readonly property bool filtering: !filtered
     readonly property int progress: filtered ? 100 : Math.floor(100 * updateIndex / allItems.count)
     property int updateIndex: 0
     onFilterChanged: Qt.callLater(update)
