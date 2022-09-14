@@ -24,7 +24,7 @@ DelegateModel {
             name: "visible"
         }
     ]
-    filterOnGroup: filter ? "visible" : "all"
+    filterOnGroup: "visible"
 
     function update(startIndex) {
         startIndex = startIndex ?? 0;
