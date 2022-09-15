@@ -16,7 +16,7 @@ DelegateModel {
     property var sortRole: ""
     property var sortOps: [ ]
     property var sortCompare: null
-    property int sortIndex: sortIndex
+    property int sortIndex: 0
     readonly property bool sorted: sortIndex >= _visibleItems.count
     readonly property bool sorting: !sorted
     readonly property alias visibleItems: _visibleItems
