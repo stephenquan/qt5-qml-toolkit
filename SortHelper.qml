@@ -132,4 +132,8 @@ QtObject {
         }
         return 0;
     }
+
+    function sortArray(arr) {
+        arr.sort(sortCompare || defaultSortCompare);
+    }
 }
