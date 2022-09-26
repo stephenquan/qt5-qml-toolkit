@@ -1,0 +1,8 @@
+ConsoleView 1.0 ConsoleView.qml
+FilterDelegateModel 1.0 FilterDelegateModel.qml
+Icon 1.0 Icon.qml
+IconButton 1.0 IconButton.qml
+SortDelegateModel 1.0 SortDelegateModel.qml
+SortFilterDelegateModel 1.0 SortFilterDelegateModel.qml
+SortHelper 1.0 SortHelper.qml
+SortListModel 1.0 SortListModel.qml
