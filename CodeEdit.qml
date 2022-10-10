@@ -15,33 +15,32 @@ Item {
     RowLayout {
         anchors.fill: parent
 
-        ListView {
+        Item {
             id: listView
             Layout.preferredWidth: textMetrics.width
             Layout.fillHeight: true
-            model: textEdit.text.split("\n")
             clip: true
-            delegate: Rectangle {
-                width: ListView.view.width
-                height: metric.height
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: (index + 1)
-                }
-
-                property Text metric: Text {
-                    width: textEdit.width
-                    text: modelData
-                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                    font.family: textEdit.font.family
+            Column {
+                width: parent.width
+                y: -flickable.contentY
+                Repeater {
+                    model: textEdit.text.split("\n")
+                    Rectangle {
+                        width: parent.width
+                        height: metric.height
+                        Text {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: (index + 1)
+                        }
+                        property Text metric: Text {
+                            width: textEdit.width
+                            text: modelData
+                            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                            font.family: textEdit.font.family
+                        }
+                    }
                 }
             }
-
-            onContentYChanged: Qt.callLater( () => {
-                                                if (!flickable.moving) {
-                                                    flickable.contentY = contentY;
-                                                }
-                                            } )
         }
 
         Flickable {
