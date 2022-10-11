@@ -29,11 +29,13 @@ ListView {
         RowLayout {
             width: parent.width
 
-            Text {
+            TextEdit {
                 Layout.fillWidth: true
 
                 text: message
                 color: messageColor
+                readOnly: true
+                selectByMouse: true
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             }
 
