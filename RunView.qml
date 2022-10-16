@@ -5,7 +5,9 @@ Item {
     id: runView
     property var obj: null
 
-    function compile(code) {
+    clip: true
+
+    function compile(code, filePath) {
         if (obj) {
             obj.destroy();
             obj = null;
@@ -15,7 +17,7 @@ Item {
             return;
         }
 
-        obj = Qt.createQmlObject(code, runView, "dynamic");
+        obj = Qt.createQmlObject(code, runView, filePath ?? "dynamic");
         obj.width = Qt.binding( () => runView.width );
         obj.height = Qt.binding( () => runView.height );
     }
