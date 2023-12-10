@@ -7,6 +7,13 @@ Item {
 
     clip: true
 
+    function stop() {
+        if (obj) {
+            obj.destroy();
+            obj = null;
+        }
+    }
+
     function compile(code, filePath) {
         if (obj) {
             obj.destroy();
